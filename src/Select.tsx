@@ -14,6 +14,15 @@ type SelectProps = {
 
 export function Select({ value, onChange, options }: SelectProps) {
   const [isOpen, setIsOpen] = useState(false);
+
+  const clearOptions = () => {
+    onChange(undefined);
+  };
+
+  const selectOption = (option: SelectOption) => {
+    onChange(option);
+  };
+
   return (
     <>
       <div
@@ -23,12 +32,28 @@ export function Select({ value, onChange, options }: SelectProps) {
         className={styles.container}
       >
         <span className={styles.value}>{value?.label}</span>
-        <button className={styles["clear-btn"]}>&times;</button>
+        <button
+          onClick={(e) => {
+            e.stopPropagation(); // it will prevent the event from bubbling up the Parent DOM tree
+            clearOptions();
+          }}
+          className={styles["clear-btn"]}
+        >
+          &times;
+        </button>
         <div className={styles.divider}></div>
         <div className={styles.caret}></div>
         <ul className={`${styles.options} ${isOpen ? styles.show : ""}`}>
           {options.map((option) => (
-            <li key={option.label} className={styles.option}>
+            <li
+              key={option.label}
+              onClick={(e) => {
+                e.stopPropagation();
+                selectOption(option);
+                setIsOpen(false);
+              }}
+              className={styles.option}
+            >
               {option.label}
             </li>
           ))}
