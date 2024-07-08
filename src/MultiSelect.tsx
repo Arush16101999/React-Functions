@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import styles from "./multiselect.module.css";
 
 export type SelectOption = {
@@ -30,6 +30,7 @@ export function MultiSelect({
 }: SelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [highlightIndex, setHighlightIndex] = useState(0);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const clearOptions = () => {
     multiple ? onChange([]) : onChange(undefined);
@@ -59,9 +60,46 @@ export function MultiSelect({
     }
   }, [isOpen]);
 
+  // keyboard shortcut keys
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.target != containerRef.current) return;
+      switch (e.code) {
+        case "Enter":
+        case "Space":
+          setIsOpen((prev) => !prev);
+          if (isOpen) selectOption(options[highlightIndex]);
+          break;
+
+        case "ArrowUp":
+        case "ArrowDown": {
+          if (!isOpen) {
+            setIsOpen(true);
+            break;
+          }
+          const newKeyValue =
+            highlightIndex + (e.code === "ArrowDown" ? 1 : -1);
+          if (newKeyValue >= 0 && newKeyValue < options.length) {
+            setHighlightIndex(newKeyValue);
+          }
+          break;
+        }
+        case "Escape":
+          setIsOpen(false);
+          break;
+      }
+    };
+    containerRef.current?.addEventListener("keydown", handler);
+
+    return () => {
+      containerRef.current?.removeEventListener("keydown", handler);
+    };
+  }); // [isOpen, highlightIndex, options] can use as array dependency or it will render every time
+
   return (
     <>
       <div
+        ref={containerRef}
         onBlur={() => setIsOpen(false)} // This to make user able to close the dropdown by clicking outside of it
         onClick={() => setIsOpen((prev) => !prev)} // This to toggle the dropdown when click the box (previous value and give the exact opposite value)
         tabIndex={0} // This to make the div focusable
