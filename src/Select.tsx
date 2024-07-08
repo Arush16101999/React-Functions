@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import styles from "./select.module.css";
 
 type SelectOption = {
   label: string;
-  value: any;
+  value: string | number;
 };
 
 type SelectProps = {
@@ -14,14 +14,29 @@ type SelectProps = {
 
 export function Select({ value, onChange, options }: SelectProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [highlightIndex, setHighlightIndex] = useState(0);
 
   const clearOptions = () => {
     onChange(undefined);
   };
 
   const selectOption = (option: SelectOption) => {
-    onChange(option);
+    if (option !== value) {
+      onChange(option);
+    } else {
+      alert("You have already selected this option");
+    }
   };
+
+  const isOptionSelected = (option: SelectOption) => {
+    return option === value; // return true if the option is selected
+  };
+
+  useEffect(() => {
+    if (isOpen) {
+      setHighlightIndex(0); // reset the highlight index when the dropdown is opened
+    }
+  }, [isOpen]);
 
   return (
     <>
@@ -44,15 +59,19 @@ export function Select({ value, onChange, options }: SelectProps) {
         <div className={styles.divider}></div>
         <div className={styles.caret}></div>
         <ul className={`${styles.options} ${isOpen ? styles.show : ""}`}>
-          {options.map((option) => (
+          {options.map((option, index) => (
             <li
-              key={option.label}
+              key={option.value}
               onClick={(e) => {
                 e.stopPropagation();
                 selectOption(option);
                 setIsOpen(false);
               }}
-              className={styles.option}
+              onMouseEnter={() => setHighlightIndex(index)} // This to highlight the option when hover on it
+              className={`${styles.option} ${
+                isOptionSelected(option) ? styles.selected : ""
+              }
+                ${index === highlightIndex ? styles.highlighted : ""}`}
             >
               {option.label}
             </li>
