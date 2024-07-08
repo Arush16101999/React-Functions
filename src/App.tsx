@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Select } from "./Select";
+
 import { MultiSelect, SelectOption } from "./MultiSelect";
 
 const options = [
@@ -25,7 +25,7 @@ function App() {
         options={options}
         value={value1}
         onChange={(o) => setValue1(o)}
-      />
+      />{" "}
       <br />
       <MultiSelect
         options={options}
